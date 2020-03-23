@@ -1,8 +1,9 @@
+### functions used to vectorize comments ###
+
 import numpy as np
 import nltk
 import re
 from contractions import CONTRACTION_MAP
-import gensim.models.keyedvectors as word2vec
 
 w2v_model = None
 
@@ -66,7 +67,7 @@ def embed_sentence(sentence):
     return embedded_sentence
 
 
-def clean_and_embed(file, model):
+def clean_and_embed_file(file, model):
     ### clean and embed each sentence in a file of comments ###
     global w2v_model
     w2v_model = model
@@ -74,8 +75,19 @@ def clean_and_embed(file, model):
 
     comments = collect_comments(file)
     for sentence in comments:
-        clean_sentence(sentence)
-        embedded_sentence = embed_sentence(sentence)
+        cleaned_sentence = clean_sentence(sentence)
+        embedded_sentence = embed_sentence(cleaned_sentence)
         vectorized_comments.append(embedded_sentence)
 
     return vectorized_comments
+
+
+def clean_and_embed_sentence(sentence, model):
+    ### clean and embed a sentence ###
+    global w2v_model
+    w2v_model = model
+
+    cleaned_sentence = clean_sentence(sentence)
+    embedded_sentence = embed_sentence(cleaned_sentence)
+
+    return embedded_sentence
