@@ -47,6 +47,11 @@ def clean_sentence(sentence):
     return cleaned
 
 
+def tagger(sentence):
+    ### add tags for the start and end of sentences ###
+    return "<SOS> " + sentence + " <EOS>"
+
+
 def getVector(w):
     ### vectorize a word with Word2Vec ###
     global w2v_model
