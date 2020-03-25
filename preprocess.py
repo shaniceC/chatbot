@@ -4,6 +4,7 @@ import numpy as np
 import nltk
 import re
 from contractions import CONTRACTION_MAP
+from keras.preprocessing.text import Tokenizer
 
 w2v_model = None
 
@@ -50,6 +51,22 @@ def clean_sentence(sentence):
 def tagger(sentence):
     ### add tags for the start and end of sentences ###
     return "<SOS> " + sentence + " <EOS>"
+
+
+def create_vocab(comments):
+    ### vectorize the sentences by turning each word into an integer ###
+    word2idx = {}
+    idx2word = {}
+
+    tokenizer = Tokenizer()
+    tokenizer.fit_on_texts(comments)
+    dictionary = tokenizer.word_index
+
+    for k, v in dictionary.items():
+        word2idx[k] = v
+        idx2word[v] = k
+
+    return word2idx, idx2word
 
 
 def getVector(w):
