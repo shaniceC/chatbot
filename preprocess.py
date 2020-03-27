@@ -128,4 +128,15 @@ def create_embedding_layer(vocab_size, max_len, embedding_matrix):
     return embedding_layer
 
 
+def reshape_data(decoder_input_data, max_len, vocab_size):
+    ### resize the data to use with the neural network ###
+    decoder_output_data = np.zeros((len(decoder_input_data), max_lem, vocab_size), dtype='float32')
+
+    for i, seqs in enumerate(decoder_input_data):
+        for j, seq in enumerate(seqs):
+            if j > 0:
+                decoder_output_data[i][j] = 1.0
+
+    print(decoder_output_data.shape)
+    return decoder_output_data
 
