@@ -5,6 +5,7 @@ import nltk
 import re
 from contractions import CONTRACTION_MAP
 from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
 
 w2v_model = None
 
@@ -76,6 +77,14 @@ def tokenize(encoder_text, decoder_text):
     decoder_sequences = tokenizer.texts_to_sequences(decoder_text)
 
     return encoder_sequences, decoder_sequences
+
+
+def pad_sequences(encoder_sequences, decoder_sequences):
+    ### pad the encoder and decoder sequences to a uniform length ###
+    encoder_input_data = pad_sequences(encoder_sequences, padding='post', truncating='post')
+    decoder_input_data = pad_sequences(decoder_sequences, padding='post', truncating='post')
+
+    return encoder_input_data, decoder_input_data
 
 
 def getVector(w):
