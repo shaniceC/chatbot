@@ -5,7 +5,8 @@ import nltk
 import re
 from contractions import CONTRACTION_MAP
 from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.sequence import 
+from keras.layers import Embedding
 
 w2v_model = None
 
@@ -49,10 +50,20 @@ def clean_sentence(sentence):
     return cleaned
 
 
-def tagger(sentence):
+def tag_sentence(sentence):
     ### add tags for the start and end of sentences ###
-    return "<SOS> " + sentence + " <EOS>"
+    sentence.insert(0, "<SOS>")
+    sentence.append("<EOS>")
+    return sentence
 
+
+def tag_sentences(sentences):
+    ### add tags for the start and end of sentences ###
+    for sentence in sentences:
+        sentence.insert(0, "<SOS>")
+        sentence.append("<EOS>")
+    
+    return sentences
 
 def create_vocab(comments):
     ### vectorize the sentences by turning each word into an integer ###
@@ -67,7 +78,7 @@ def create_vocab(comments):
         word2idx[k] = v
         idx2word[v] = k
 
-    return word2idx, idx2word
+    return word2idx, idx2word, len(word2idx.keys())
 
 
 def tokenize(encoder_text, decoder_text):
@@ -84,50 +95,37 @@ def pad_sequences(encoder_sequences, decoder_sequences):
     encoder_input_data = pad_sequences(encoder_sequences, padding='post', truncating='post')
     decoder_input_data = pad_sequences(decoder_sequences, padding='post', truncating='post')
 
-    return encoder_input_data, decoder_input_data
+    return encoder_input_data, decoder_input_data, encoder_input_data.shape[0]
 
 
-def getVector(w):
-    ### vectorize a word with Word2Vec ###
-    global w2v_model
-    if w in w2v_model:
-        return w2v_model[w]
-    else:
-        return np.zeros(300)
+def get_embeddings(model_dir):
+    ### get the embeddings from word2vec ###
+    embeddings_index = {}
+    with open(model_dir, buffering=1000) as f:
+        for line in f:
+            values = line.split()
+            word = values[0]
+            coefs = np.asarray(values[1:], dtype='float32')
+            embeddings_index[word] = coefs
+
+    return embeddings_index
 
 
-def embed_sentence(sentence):
-    ### embed each word in the sentence ###
-    embedded_sentence = []
-    
-    for word in sentence:
-        word_embedding = getVector(word)
-        embedded_sentence.append(word_embedding)
+def create_embedding_matrix(word_index):
+    ### create embedding matrix using pretrained word2vec model ###
+    embedding_matrix = np.zeros((len(word_index) + 1, 100))
+    for word, i in word_index.items():
+        embedding_vector = embeddings_index.get(word)
+        if embedding_vector is not None:
+            embedding_matrix[i] = embedding_vector
 
-    return embedded_sentence
-
-
-def clean_and_embed_file(file, model):
-    ### clean and embed each sentence in a file of comments ###
-    global w2v_model
-    w2v_model = model
-    vectorized_comments = []
-
-    comments = collect_comments(file)
-    for sentence in comments:
-        cleaned_sentence = clean_sentence(sentence)
-        embedded_sentence = embed_sentence(cleaned_sentence)
-        vectorized_comments.append(embedded_sentence)
-
-    return vectorized_comments
+    return embedding_matrix
 
 
-def clean_and_embed_sentence(sentence, model):
-    ### clean and embed a sentence ###
-    global w2v_model
-    w2v_model = model
+def create_embedding_layer(vocab_size, max_len, embedding_matrix):
+    ### create embedding layer to be used with the word2vec model from Glove ###
+    embedding_layer = Embedding(input_dim=vocab_size, output_dim=100, input_length=max_len, weights=[embedding_matrix], trainable=False)
+    return embedding_layer
 
-    cleaned_sentence = clean_sentence(sentence)
-    embedded_sentence = embed_sentence(cleaned_sentence)
 
-    return embedded_sentence
+
