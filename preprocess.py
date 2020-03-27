@@ -69,6 +69,15 @@ def create_vocab(comments):
     return word2idx, idx2word
 
 
+def tokenize(encoder_text, decoder_text):
+    ### tokenize bag of words to bag of ids ###
+    tokenizer = Tokenizer
+    encoder_sequences = tokenizer.texts_to_sequences(encoder_text)
+    decoder_sequences = tokenizer.texts_to_sequences(decoder_text)
+
+    return encoder_sequences, decoder_sequences
+
+
 def getVector(w):
     ### vectorize a word with Word2Vec ###
     global w2v_model
