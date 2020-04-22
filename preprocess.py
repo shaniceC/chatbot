@@ -8,7 +8,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences 
 from keras.layers import Embedding
 
-w2v_model = None
+tokenizer = None
 
 def collect_comments(filename):
     ### collect the comments/replies from the files ###
@@ -59,14 +59,23 @@ def clean_sentences(sentences):
     
     return sentences
 
-def tokenize(comments, replies):
-    ### create a word index (word to id) and reverse word index (id to word) and pad to uniform length###
+
+def fit_tokenizer(comments, replies):
+    ### fit the tokenizer to the vocabulary of the comments and replies ###
+    global tokenizer
+
     all_sentences = comments + replies
     tokenizer = Tokenizer(filters=' ')
     tokenizer.fit_on_texts(all_sentences)
+
+
+def tokenize(sentences):
+    ### tokenize and pad the sentences ###
+    global tokenizer
     
-    tensor = tokenizer.texts_to_sequences(all_sentences)
+    tensor = tokenizer.texts_to_sequences(sentences)
     tensor = pad_sequences(tensor, padding='post')
 
-    return tensor, tokenizer
+    return tensor
+
 
