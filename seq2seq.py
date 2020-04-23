@@ -5,6 +5,7 @@ from tensorflow.keras.layers import GRU, Embedding, Layer, Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy
+from preprocess import tokenizer
 
 class Encoder(Model):
     def __init__(self, vocab_size, embedding_dim, enc_units, batch_size):
@@ -94,3 +95,31 @@ def loss_function(real, pred):
 
     return tf.reduce_mean(loss_)
 
+
+def train_step(input, target, enc_hidden, encoder, decoder, optimizer):
+    loss = 0
+
+    with tf.GradientTape() as tape:
+        enc_output, enc_hidden = encoder(input, enc_hidden)
+
+        dec_hidden = enc_hidden
+        dec_input = tf.expand_dims([tokenizer.word_index['<SOS>']] * batch_size, 1)
+
+        # geed the target as the next input
+        for t in range(1, target.shape[1]):
+            # pass encoder output to the decoder
+            predictions, dec_hidden, _ = decoder(dec_input, dec_hidden, enc_output)
+
+            loss += loss_function(target[:, t], predictions)
+
+            dec_input = tf.expand_dims(target[:, t], 1)
+
+    batch_loss = (loss / int(target.shape[1]))
+
+    variables = encoder.trainable_variables + decoder.trainable_variables
+
+    gradients = tape.gradient(loss, variables)
+
+    optimizer.apply_gradients(zip(gradients, variables))
+
+    return batch_loss
