@@ -7,6 +7,7 @@ Created on Mon Aug 01 01:11:02 2016
 
 CONTRACTION_MAP = {
 "ain't": "is not",
+"aın't": "is not",
 "aren't": "are not",
 "can't": "cannot",
 "can't've": "cannot have",
@@ -44,6 +45,7 @@ CONTRACTION_MAP = {
 "i'm": "i am",
 "i've": "i have",
 "isn't": "is not",
+"i̇sn't": "is not",
 "it'd": "it would",
 "it'd've": "it would have",
 "it'll": "it will",
