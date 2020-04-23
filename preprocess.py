@@ -32,8 +32,8 @@ def expand_contractions(text, contraction_mapping=CONTRACTION_MAP):
         first_char = match[0]
         expanded_contraction = contraction_mapping.get(match)\
                                 if contraction_mapping.get(match)\
-                                else contraction_mapping.get(match.lower())                       
-        expanded_contraction = first_char+expanded_contraction[1:]
+                                else contraction_mapping.get(match.lower())
+
         return expanded_contraction
         
     expanded_text = contractions_pattern.sub(expand_match, text)
@@ -68,6 +68,8 @@ def fit_tokenizer(comments, replies):
     tokenizer = Tokenizer(filters=' ')
     tokenizer.fit_on_texts(all_sentences)
 
+    return len(tokenizer.word_index)+1
+
 
 def tokenize(sentences):
     ### tokenize and pad the sentences ###
@@ -77,5 +79,4 @@ def tokenize(sentences):
     tensor = pad_sequences(tensor, padding='post')
 
     return tensor
-
 
