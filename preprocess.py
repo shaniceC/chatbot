@@ -54,10 +54,11 @@ def clean_sentence(sentence):
 
 def clean_sentences(sentences):
     ### expand contractions in the sentences and make the words lowercase ###
+    cleaned_sentences = []
     for sentence in sentences:
-        clean_sentence(sentence)
+        cleaned_sentences.append(clean_sentence(sentence))
     
-    return sentences
+    return cleaned_sentences
 
 
 def fit_tokenizer(comments, replies):
