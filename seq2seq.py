@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import GRU, Embedding, Layer, Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.loss import SparseCategoricalCrossentropy
+from tensorflow.keras.losses import sparse_categorical_crossentropy
 
 class Encoder(Model):
     def __init__(self, vocab_size, embedding_dim, enc_units, batch_size):
@@ -84,12 +84,12 @@ class Decoder(Model):
 
 def loss_function(real, pred):
     optimizer = Adam()
-    loss_object = SparseCategoricalCrossentropy(from_logits=True, reduction='none')
+    loss_object = sparse_categorical_crossentropy(from_logits=True, reduction='none')
 
     mask = tf.math.logical_not(tf.math.equal(real, 0))
     loss_ = loss_object(real, pred)
 
-    mask = tf.cast(mask, dtype=loss_.dtype)\
+    mask = tf.cast(mask, dtype=loss_.dtype)
     loss_ *= mask
 
     return tf.reduce_mean(loss_)
