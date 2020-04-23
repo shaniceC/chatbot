@@ -23,7 +23,7 @@ class Encoder(Model):
 
 
     def initialize_hidden_state(self):
-        return tf.zeros((self.batch_size, self.enc_unitsshape))
+        return tf.zeros((self.batch_size, self.enc_units))
 
 
 class BahdanauAttention(Layer):
