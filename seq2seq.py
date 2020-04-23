@@ -45,3 +45,44 @@ class BahdanauAttention(Layer):
         context_vector = tf.reduce_sum(context_vector, axis=1)
 
         return context_vector, attention_weights
+
+
+class Decoder(Model):
+    def __init__(self, vocab_size, embedding_dim, dec_units, batch_size):
+        super(Decoder, self).__init__()
+        self.batch_size = batch_size
+        self.dec_units = dec_units
+        self.embedding = Embedding(vocab_size, embedding_dim)
+        self.gru = GRU(self.dec_units, return_sequences=True, return_state=True, recurrent_initializer='glorot_uniform')
+        self.fc = Dense(vocab_size)
+        self.attention = BahdanauAttention(self.dec_units)
+
+
+    def call(self, x, hidden, enc_output):
+        # encoder output shape = (batch_size, max_length, hidden_size)
+        context_vector, attention_weights = self.attention(hidden, enc_output)
+
+        # x shape after passing through embeddin = (batch_size, 1, embedding_dim)
+        x = self.embedding(x)
+
+        # x shape after concatenation = (batch_size, 1, embedding_dim + hidden_size)
+        x = tf.concat([tf.expand_dims(context_vector, 1), x], axis=-1)
+
+        # passing the concatenated vector to the GRU
+        output, state = self.gru(x)
+
+        # output shape = (batch_size * 1, hidden_size)
+        output = tf.reshape(output, (-1, output.shape[2]))
+
+        # output shape = (batch_size, vocab)
+        x = self.fc(output)
+
+        return x, state, attention_weights
+
+
+
+
+
+
+
+
