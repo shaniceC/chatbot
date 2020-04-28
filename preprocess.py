@@ -1,6 +1,4 @@
 ### functions used to vectorize comments ###
-
-import numpy as np
 import nltk
 import re
 from contractions import CONTRACTION_MAP
@@ -46,8 +44,8 @@ def clean_sentence(sentence):
     ### expand contractions in the sentence, make the words lowercase and add start/end tags###
     sentence = expand_contractions(sentence)
     cleaned = nltk.word_tokenize(sentence.lower())
-    cleaned.insert(0, "<SOS>")
-    cleaned.append("<EOS>")
+    cleaned.insert(0, "<sos>")
+    cleaned.append("<eos>")
 
     return " ".join(cleaned)
 
@@ -80,4 +78,19 @@ def tokenize(sentences):
     tensor = pad_sequences(tensor, padding='post')
 
     return tensor
+
+
+def tokenize_words(words, max_legth):
+    ### tokenize and pad a list of words ###
+    global tokenizer
+
+    word_sequence = pad_sequences([words], maxlen=max_legth, padding='post')
+
+    input_tensor = tf.convert_to_tensor(word_sequence)
+
+    return input_tensor
+
+
+
+
 
