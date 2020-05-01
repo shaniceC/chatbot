@@ -90,7 +90,3 @@ def tokenize_words(words, max_legth):
 
     return input_tensor
 
-
-
-
-
