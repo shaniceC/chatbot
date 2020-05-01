@@ -5,7 +5,10 @@ from tensorflow.keras.layers import GRU, Embedding, Layer, Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import sparse_categorical_crossentropy
-from preprocess import tokenizer
+from preprocess import tokenizer, clean_sentence, tokenize_words
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 class Encoder(Model):
     def __init__(self, vocab_size, embedding_dim, enc_units, batch_size):
@@ -85,7 +88,7 @@ class Decoder(Model):
 
 def loss_function(real, pred):
     optimizer = Adam()
-    loss_object = sparse_categorical_crossentropy(from_logits=True, reduction='none')
+    loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
     mask = tf.math.logical_not(tf.math.equal(real, 0))
     loss_ = loss_object(real, pred)
@@ -103,7 +106,7 @@ def train_step(input, target, enc_hidden, encoder, decoder, optimizer):
         enc_output, enc_hidden = encoder(input, enc_hidden)
 
         dec_hidden = enc_hidden
-        dec_input = tf.expand_dims([tokenizer.word_index['<SOS>']] * batch_size, 1)
+        dec_input = tf.expand_dims([tokenizer.word_index['<sos>']] * batch_size, 1)
 
         # geed the target as the next input
         for t in range(1, target.shape[1]):
@@ -123,3 +126,67 @@ def train_step(input, target, enc_hidden, encoder, decoder, optimizer):
     optimizer.apply_gradients(zip(gradients, variables))
 
     return batch_loss
+
+
+def evaluate(sentence, max_length_target, max_length_input, units):
+    ### evaluate the trained model ###
+    attention_plot = np.zeros((max_length_target, max_length_input))
+
+    sentence = clean_sentence(sentence)
+    input_sentence = [tokenizer.word_index[i] for i in sentence.split(' ')]
+    input_tensor = tokenize_words(input_sentence, max_legth_input)
+
+    result = ''
+    hidden = [tf.zeros((1, units))]
+    encoder_output, encoder_hidder = encoder(input_tensor, hidden)
+
+    decoder_hidden = encoder_hidden
+    decoder_input = tf.expand_dims([tokenizer.word_index['<sos>']], 0)
+
+    for t in range(max_length_target):
+        predictions, decoder_hidden, attention_weights = decoder(decoder_input, decoder_hidden, encoder_output)
+
+        # store the attention weights to plot later on
+        attention_weights = tf.reshape(attention_weights, (-1, ))
+        attention_plot[t] = attention_weights.numpy()
+
+        predicted_id = tf.argmax(predictions[0]).numpy()
+
+        result += tokenizer.index_word[predicted_id] + ' '
+
+        if tokenizer.index_word[predicted_id] == '<eos>':
+            return result, sentence, attention_plot
+
+
+        # predictied id is fed back into the model
+        decoder_input = tf.expand_dims([predicted_id], 0)
+
+    return result, sentence, attention_plot
+
+
+def plot_attention(attention, sentence, predicted_sentence):
+    ### plot the attention weights ###
+    fig = plt.figure(figsize=(10,10))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.matshow(attention, cmap='viridis')
+
+    fontdict = {'fontsize': 14}
+
+    ax.set_xticklabels([''] + sentence, fontdict=fontdict, rotation=90)
+    ax.set_yticklabels([''] + predicted_sentence, fontdict=fontdict)
+
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
+
+    plt.show()
+
+
+def reply(sentence, max_length_target, max_length_input, units):
+    result, sentence, attention_plot = evaluate(entence, max_length_target, max_length_input, units)
+
+    print('Input: ' + sentence)
+    print('Response: {}'.format(result))
+
+    attention_plot = attention_plot[:len(reslut.split(' ')), :len(sentence.split(' '))]
+    plot_attention(attention_plot, sentence.split(' '), result.split(' '))
+
