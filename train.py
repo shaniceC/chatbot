@@ -36,10 +36,10 @@ x_train, x_val, y_train, y_val = train_test_split(input_tensor, target_tensor, t
 print("Training Examples: {}".format(len(x_train)))
 print("Validation Examples: {}".format(len(x_val)))
 
-buffer_size = 500
-batch_size = 64
+buffer_size = 45
+batch_size = 45
 steps_per_epoch = len(x_train) // batch_size
-embedding_dim = 256
+embedding_dim = 100
 units = 256
 epochs = 10
 
@@ -77,3 +77,12 @@ for epoch in range(epochs):
 
     print("Epoch: {} Loss: {:.4f}".format(epoch + 1, total_loss / steps_per_epoch))
     print("Time taken for 1 epoch: {} sec\n".format(time.time() - start))
+
+
+# evaluate the trained model
+print("Evaluating the model")
+
+# restore the latest checkpoint
+checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
+reply(x_val[0], target_length, input_length, units)
+
