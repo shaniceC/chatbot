@@ -134,7 +134,7 @@ def evaluate(sentence, max_length_target, max_length_input, units):
 
     sentence = clean_sentence(sentence)
     input_sentence = [tokenizer.word_index[i] for i in sentence.split(' ')]
-    input_tensor = tokenize_words(input_sentence, max_legth_input)
+    input_tensor = tokenize_words(input_sentence, max_length_input)
 
     result = ''
     hidden = [tf.zeros((1, units))]
