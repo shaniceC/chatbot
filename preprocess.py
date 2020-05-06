@@ -80,11 +80,11 @@ def tokenize(sentences):
     return tensor
 
 
-def tokenize_words(words, max_legth):
+def tokenize_words(words, max_length):
     ### tokenize and pad a list of words ###
     global tokenizer
 
-    word_sequence = pad_sequences([words], maxlen=max_legth, padding='post')
+    word_sequence = pad_sequences([words], maxlen=max_length, padding='post')
 
     input_tensor = tf.convert_to_tensor(word_sequence)
 
