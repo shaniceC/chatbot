@@ -138,7 +138,7 @@ def evaluate(sentence, max_length_target, max_length_input, units):
 
     result = ''
     hidden = [tf.zeros((1, units))]
-    encoder_output, encoder_hidder = encoder(input_tensor, hidden)
+    encoder_output, encoder_hidden = encoder(input_tensor, hidden)
 
     decoder_hidden = encoder_hidden
     decoder_input = tf.expand_dims([tokenizer.word_index['<sos>']], 0)
@@ -187,6 +187,6 @@ def reply(sentence, max_length_target, max_length_input, units):
     print('Input: ' + sentence)
     print('Response: {}'.format(result))
 
-    attention_plot = attention_plot[:len(reslut.split(' ')), :len(sentence.split(' '))]
+    attention_plot = attention_plot[:len(result.split(' ')), :len(sentence.split(' '))]
     plot_attention(attention_plot, sentence.split(' '), result.split(' '))
 
